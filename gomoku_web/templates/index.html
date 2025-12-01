@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AlphaGomoku</title>
+    <style>
+        /* CSS Variables */
+        :root {
+            --bg-color: #F2F0EB;
+            --board-bg: #E6E2D8;
+            --text-main: #33302E;
+            --text-sub: #8A847C;
+            --accent: #BC4732;
+            --shadow-diffuse: rgba(92, 85, 75, 0.12);
+            --shadow-deep: rgba(60, 50, 40, 0.2);
+        }
+
+        /* Global Styles */
+        body {
+            margin: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: "Georgia", "Times New Roman", serif;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Noise texture for paper effect */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+        }
+
+        /* Layout Container */
+        .app-container {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 5vh;
+            width: 90vw;
+            height: 90vh;
+            position: relative;
+        }
+
+        /* Mobile Adaptation */
+        @media (max-aspect-ratio: 1/1) {
+            .app-container { flex-direction: column-reverse; gap: 2vh; }
+            .hud { width: 100% !important; flex-direction: row; justify-content: space-around; }
+            .logo-group { display: none; }
+        }
+
+        /* Sidebar / HUD */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 80%;
+            width: 240px;
+            z-index: 10;
+        }
+
+        .logo-group h1 {
+            font-weight: normal;
+            font-size: 2rem;
+            margin: 0;
+            letter-spacing: 0.1em;
+            color: var(--text-main);
+        }
+        .logo-group span {
+            display: block;
+            font-family: sans-serif;
+            font-size: 0.65rem;
+            letter-spacing: 0.2em;
+            color: var(--text-sub);
+            margin-top: 8px;
+            text-transform: uppercase;
+        }
+
+        .status-card {
+            margin-top: auto;
+            margin-bottom: auto;
+        }
+        .label {
+            font-family: sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-sub);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .value {
+            font-size: 2.2rem;
+            font-feature-settings: "tnum";
+            border-bottom: 1px solid #D0CCC4;
+            padding-bottom: 12px;
+            margin-bottom: 24px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            background: transparent;
+            border: 1px solid var(--text-main);
+            color: var(--text-main);
+            padding: 12px 24px;
+            font-family: sans-serif;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+        button:hover {
+            background: var(--text-main);
+            color: var(--bg-color);
+            box-shadow: 0 10px 20px var(--shadow-diffuse);
+        }
+
+        /* Board Container */
+        .board-frame {
+            aspect-ratio: 1/1; 
+            background: var(--board-bg);
+            border-radius: 4px;
+            box-shadow: 
+                20px 20px 60px var(--shadow-diffuse),
+                -10px -10px 40px rgba(255,255,255,0.9);
+            position: relative;
+            padding: 20px;
+            box-sizing: border-box;
+            transition: transform 0.1s;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+            border-radius: 2px;
+        }
+
+        /* Modal Overlay */
+        .modal-backdrop {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(242, 240, 235, 0.85);
+            backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 999;
+            opacity: 0; pointer-events: none; transition: opacity 0.4s;
+        }
+        .modal-backdrop.active { opacity: 1; pointer-events: all; }
+
+        .setup-panel {
+            background: #fff;
+            padding: 40px 50px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.08);
+            border: 1px solid #EAE8E0;
+            text-align: center;
+            max-width: 400px;
+        }
+        .setup-panel h2 { font-weight: normal; letter-spacing: 2px; margin-bottom: 30px; }
+        
+        select {
+            width: 100%; padding: 10px; margin-bottom: 20px;
+            background: #F9F9F9; border: 1px solid #ddd;
+            font-family: sans-serif; color: #333; outline: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="modal-backdrop active" id="setupModal">
+        <div class="setup-panel">
+            <h2>NEW GAME</h2>
+            
+            <div class="label" style="text-align:left">MODE</div>
+            <select id="modeSelect" onchange="toggleMode()">
+                <option value="H2M">Player vs AI</option>
+                <option value="M2M">AI vs AI (Spectator)</option>
+            </select>
+            
+            <div id="h2m-controls">
+                <div class="label" style="text-align:left">YOUR SIDE</div>
+                <select id="colorSelect">
+                    <option value="1">Black (First)</option>
+                    <option value="-1">White (Second)</option>
+                </select>
+
+                <div class="label" style="text-align:left">OPPONENT STRENGTH</div>
+                <select id="levelSelect">
+                    <option value="3">Level 3 (AlphaZero)</option>
+                    <option value="2">Level 2 (Minimax)</option>
+                    <option value="1">Level 1 (Greedy)</option>
+                </select>
+            </div>
+
+            <div id="m2m-controls" style="display:none">
+                <div style="display:flex; gap:15px">
+                    <div style="flex:1">
+                        <div class="label" style="text-align:left">BLACK AI</div>
+                        <select id="levelBlack">
+                            <option value="3">L3 (Hard)</option>
+                            <option value="2">L2 (Medium)</option>
+                            <option value="1">L1 (Easy)</option>
+                        </select>
+                    </div>
+                    <div style="flex:1">
+                        <div class="label" style="text-align:left">WHITE AI</div>
+                        <select id="levelWhite">
+                            <option value="3">L3 (Hard)</option>
+                            <option value="2">L2 (Medium)</option>
+                            <option value="1">L1 (Easy)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="startGame()" style="width:100%; margin-top:20px">START GAME</button>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <div class="sidebar hud">
+            <div class="logo-group">
+                <h1>ALPHA<br>GOMOKU</h1>
+                <span>NEURO-SYMBOLIC<br>ARCHITECTURE</span>
+            </div>
+
+            <div class="status-card">
+                <div class="label">CURRENT TURN</div>
+                <div class="value" id="statusText">Ready</div>
+                
+                <div class="label">SYSTEM INFO</div>
+                <div class="value" id="infoText" style="font-size: 1rem; border:none;">Waiting...</div>
+            </div>
+
+            <div class="controls">
+                <button onclick="showSetup()">RESET</button>
+            </div>
+        </div>
+
+        <div class="board-frame" id="boardContainer">
+            <canvas id="boardCanvas"></canvas>
+        </div>
+    </div>
+
+    <script>
+        function toggleMode() {
+            const mode = document.getElementById('modeSelect').value;
+            document.getElementById('h2m-controls').style.display = mode === 'H2M' ? 'block' : 'none';
+            document.getElementById('m2m-controls').style.display = mode === 'M2M' ? 'block' : 'none';
+        }
+    </script>
+    <script src="/static/gomoku.js"></script>
+</body>
+</html>
