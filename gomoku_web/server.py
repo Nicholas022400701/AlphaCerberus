@@ -61,10 +61,15 @@ try:
     from config import CONF
     from model import AlphaGomokuNet
     from mcts import MCTS
-    from game import GomokuEnv
+    from game import GomokuEnv, initialize_game_engine
 except ImportError as e:
     logger.critical(f"Module import failed: {e}")
     sys.exit(1)
+
+# Warmup: Pre-compile Numba JIT functions at startup to avoid delay at game start
+logger.info("Warming up Numba JIT functions...")
+initialize_game_engine()
+logger.info("Numba warmup complete.")
 
 app = Flask(__name__)
 
@@ -96,6 +101,7 @@ class InferenceEngine:
                 self.model.eval()
                 self.ready = True
                 self._reset_state()
+                self._warmup_inference()
             except Exception as e:
                 logger.error(f"Failed to load model: {e}")
         else:
@@ -105,6 +111,13 @@ class InferenceEngine:
         self.env = GomokuEnv(CONF.BOARD_SIZE, CONF.N_IN_ROW, CONF.INPUT_CHANNELS)
         self.mcts = MCTS(self)
         logger.info("Game state reset.")
+
+    def _warmup_inference(self):
+        """Warmup neural network inference to avoid delay at first game move."""
+        logger.info("Warming up neural network inference...")
+        dummy_state = np.zeros((CONF.INPUT_CHANNELS, CONF.BOARD_SIZE, CONF.BOARD_SIZE), dtype=np.float32)
+        self.infer(dummy_state)
+        logger.info("Neural network warmup complete.")
 
     def infer(self, state_np, stop_signal=None):
         # Test-Time Augmentation (TTA)
