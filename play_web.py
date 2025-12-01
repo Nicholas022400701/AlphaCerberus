@@ -12,12 +12,17 @@ from flask import Flask, jsonify, request, render_template_string
 # Import Core Components
 try:
     from config import CONF
-    from game import GomokuEnv, P1, P2
+    from game import GomokuEnv, P1, P2, initialize_game_engine
     from model import AlphaGomokuNet, load_model
     from mcts import MCTS
 except ImportError as e:
     print(f"Fatal: Core modules missing. {e}")
     sys.exit(1)
+
+# Warmup: Pre-compile Numba JIT functions at startup to avoid delay at game start
+print("🔥 Warming up Numba JIT functions...")
+initialize_game_engine()
+print("✅ Numba warmup complete.")
 
 # Disable Flask logging interference
 log = logging.getLogger('werkzeug'); log.setLevel(logging.ERROR)
@@ -53,7 +58,17 @@ class AIPilot:
         self.env = GomokuEnv(CONF.BOARD_SIZE, CONF.N_IN_ROW, CONF.INPUT_CHANNELS)
         
         # Bind MCTS
-        self.mcts = MCTS(self) 
+        self.mcts = MCTS(self)
+        
+        # Warmup: Run a dummy inference to avoid delay at first game move
+        self._warmup_inference()
+
+    def _warmup_inference(self):
+        """Warmup neural network inference to avoid delay at first game move."""
+        print("🔥 Warming up neural network inference...")
+        dummy_state = np.zeros((CONF.INPUT_CHANNELS, CONF.BOARD_SIZE, CONF.BOARD_SIZE), dtype=np.float32)
+        self.infer(dummy_state)
+        print("✅ Neural network warmup complete.")
         
     def infer(self, state_np, stop_signal=None):
         """ 
