@@ -336,5 +336,6 @@ def initialize_game_engine():
     env.step(0)
     env.get_state() 
     env.solve_vcf(2)
+    env.solve_vct(2, 2)  # Warmup VCT related JIT functions
     env.get_urgent_move()
     logging.info("Game Engine ready.")
