@@ -3,12 +3,12 @@
 *.npz
 
 # --- Python Standard ---
-# 解释：Python 编译生成的字节码缓存，绝对不需要上传
+# Python compiled bytecode cache, no need to upload
 __pycache__/
 *.py[cod]
 
 # --- Environments ---
-# 解释：你的虚拟环境，里边有几万个库文件，传上去就是灾难
+# Virtual environment folders contain thousands of library files, do not upload
 .env
 .venv
 env/
@@ -16,18 +16,18 @@ venv/
 ENV/
 
 # --- IDE Settings ---
-# 解释：你用 VSCode 或 PyCharm 的个人配置，别人不需要
+# Personal IDE settings for VSCode or PyCharm, not needed by others
 .vscode/
 .idea/
 
 # --- System Junk ---
-# 解释：Windows 和 Mac 的系统生成垃圾
+# System-generated files from Windows and Mac
 Thumbs.db
 Desktop.ini
 .DS_Store
 
 # --- Other Model/Data Formats (Just in case) ---
-# 既然是搞 AlphaW3，这些如果不屏蔽以后也会是大坑
+# These formats can also cause issues if not ignored
 *.pth
 *.h5
 *.pkl
