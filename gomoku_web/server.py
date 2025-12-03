@@ -59,7 +59,7 @@ sys.path.append(parent_dir)
 try:
     from ai.registry import AI_LEVELS
     from config import CONF
-    from model import AlphaGomokuNet
+    from model import AlphaCerberusNet
     from mcts import MCTS
     from game import GomokuEnv, initialize_game_engine
 except ImportError as e:
@@ -76,7 +76,7 @@ app = Flask(__name__)
 class InferenceEngine:
     def __init__(self):
         self.device = CONF.DEVICE
-        self.model = AlphaGomokuNet().to(self.device)
+        self.model = AlphaCerberusNet().to(self.device)
         self.ready = False
         self.env = None
         self.mcts = None
@@ -245,5 +245,5 @@ def ai_move():
     return jsonify({"x": int(x), "y": int(y)})
 
 if __name__ == "__main__":
-    print("\nAlphaGomoku Server Running...\n")
+    print("\nAlpha-Cerberus Server Running...\n")
     app.run(host="127.0.0.1", port=5050, debug=False)

@@ -1,8 +1,8 @@
-# AlphaGomoku: Neuro-Symbolic Gomoku AI
+# Alpha-Cerberus: Neuro-Symbolic Gomoku AI
 
 ![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)
 
-This is the source code repository for AlphaGomoku. Unlike AlphaZero which relies purely on computational power, this project adopts a **Neuro-Symbolic** architecture.
+This is the source code repository for Alpha-Cerberus. Unlike AlphaZero which relies purely on computational power, this project adopts a **Neuro-Symbolic** architecture.
 
 Core logic: Intuition (Neural Network) + Logic (VCF/VCT Solver).
 
@@ -27,7 +27,7 @@ This is the brain of the AI. Modifying this affects the fundamentals.
   - **Logic**: Disables exponentially time-consuming VCT detection, still easily defeats greedy algorithms.
 - **`model.py`**
   - **Purpose**: Neural network definition.
-  - **Logic**: Standard AlphaZero dual-head architecture (Policy head + Value head). Backbone is ResNet.
+  - **Logic**: Standard Alpha-Cerberus dual-head architecture (Policy head + Value head). Backbone is ResNet.
   - **Input**: 15x15x4 Tensor (self, opponent, last move, color).
 - **`mcts.py`**
   - **Purpose**: Monte Carlo Tree Search (MCTS) implementation.

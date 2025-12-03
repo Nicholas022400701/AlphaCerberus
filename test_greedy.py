@@ -11,7 +11,7 @@ import time
 try:
     from config4greedy import CONF
     from game import GomokuEnv, P1, P2
-    from model import AlphaGomokuNet, load_model
+    from model import AlphaCerberusNet, load_model
     from mcts import MCTS
     from heuristic import GreedyGomokuAgent
 except ImportError as e:
@@ -90,7 +90,7 @@ def run_duel(sl_model_path, ai_plays_black=True):
     print("="*60)
 
     # A. Initialize model
-    model = AlphaGomokuNet().to(device)
+    model = AlphaCerberusNet().to(device)
     if not load_model(model, sl_model_path, device):
         print("❌ Model loading failed, skipping.")
         return None

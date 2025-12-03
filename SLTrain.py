@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - [TRAIN] - %(messag
 
 try:
     from config import CONF
-    from model import AlphaGomokuNet
+    from model import AlphaCerberusNet
 except ImportError:
     print("Error: Cannot import 'config' or 'model'.")
     sys.exit(1)
@@ -139,7 +139,7 @@ def main(args):
     if not train_loader: return
 
     # 2. Model
-    model = AlphaGomokuNet().to(device)
+    model = AlphaCerberusNet().to(device)
     
     # 3. Optimizer
     optimizer = optim.AdamW(model.parameters(), lr=args.learning_rate, weight_decay=CONF.WEIGHT_DECAY)

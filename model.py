@@ -21,7 +21,7 @@ class ResBlock(nn.Module):
         out += residual
         return F.relu(out)
 
-class AlphaGomokuNet(nn.Module):
+class AlphaCerberusNet(nn.Module):
     def __init__(self):
         super().__init__()
         self.start_block = nn.Sequential(
