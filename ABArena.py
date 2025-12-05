@@ -101,8 +101,8 @@ def worker_play_game_gpu(args):
     mcts = MCTS(LocalPipe(model, device))
     env = GomokuEnv(CONF.BOARD_SIZE, CONF.N_IN_ROW, CONF.INPUT_CHANNELS)
     
-    # Tactical config: Keep 400 simulations, but this will be very fast on GPU
-    CONF.MCTS_SIMULATION_SCHEDULE = [(0, 400)] 
+    # Tactical config: 800 simulations
+    CONF.MCTS_SIMULATION_SCHEDULE = [(0, 800)] 
     
     # Warm up
     env.step(0); env.solve_vcf(2); env.reset()
