@@ -22,7 +22,7 @@ except ImportError:
 try:
     from config import CONF
     from game import GomokuEnv, P1, P2
-    from model import AlphaGomokuNet
+    from model import AlphaCerberusNet
     from mcts import MCTS
 except ImportError:
     print("❌ Missing core files.")
@@ -74,7 +74,7 @@ def worker_play_game_gpu(args):
     device = torch.device(device_str)
     
     # Load model
-    model = AlphaGomokuNet().to(device)
+    model = AlphaCerberusNet().to(device)
     try:
         # Load safely using weights_only=True
         state = torch.load(model_path, map_location=device, weights_only=True)

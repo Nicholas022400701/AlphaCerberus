@@ -13,7 +13,7 @@ from flask import Flask, jsonify, request, render_template_string
 try:
     from config import CONF
     from game import GomokuEnv, P1, P2, initialize_game_engine
-    from model import AlphaGomokuNet, load_model
+    from model import AlphaCerberusNet, load_model
     from mcts import MCTS
 except ImportError as e:
     print(f"Fatal: Core modules missing. {e}")
@@ -34,7 +34,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 class AIPilot:
     def __init__(self):
         self.device = CONF.DEVICE
-        self.model = AlphaGomokuNet().to(self.device)
+        self.model = AlphaCerberusNet().to(self.device)
         
         # Log directory
         self.log_dir = "logs"
@@ -152,7 +152,7 @@ class AIPilot:
             filename = f"loss_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
             path = os.path.join(self.log_dir, filename)
             log_data = {
-                "title": "AlphaGomoku Defeat Report",
+                "title": "Alpha-Cerberus Defeat Report",
                 "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 "total_moves": len(self.history),
                 "reason": "Human Outsmarted AI",
@@ -247,7 +247,7 @@ HTML = """
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>AlphaGomoku: The God Mode</title>
+    <title>Alpha-Cerberus: The God Mode</title>
     <style>
         /* Unified Font: Segoe UI */
         :root { --bg: #0f0f0f; --board: #e6b333; --text: #e0e0e0; --accent: #00d2d3; --ui: #222; }
@@ -278,7 +278,7 @@ HTML = """
 <body>
     <div class="header">
         <div style="width:100px"></div>
-        <h1>ALPHA<span style="color:var(--accent)">GOMOKU</span> <span style="font-size:0.4em;color:#666;vertical-align:middle">TTA・HYBRID</span></h1>
+        <h1>ALPHA<span style="color:var(--accent)">CERBERUS</span> <span style="font-size:0.4em;color:#666;vertical-align:middle">TTA・HYBRID</span></h1>
         <div class="controls"><button onclick="resetGame()">RESTART SYSTEM</button></div>
     </div>
     <div class="arena">
@@ -362,5 +362,5 @@ def move():
     return jsonify({"human_winner": 0, "ai_data": bot.ai_move()})
 
 if __name__ == "__main__":
-    print("\n" + "="*60 + "\n 👑 ALPHA-GOMOKU GOD MODE (TTA ENABLED) 👑\n" + "="*60)
+    print("\n" + "="*60 + "\n 👑 ALPHA-CERBERUS GOD MODE (TTA ENABLED) 👑\n" + "="*60)
     app.run(host='0.0.0.0', port=5000, debug=False)

@@ -1,5 +1,5 @@
 /**
- * ALPHA GOMOKU - CORE LOGIC
+ * ALPHA-CERBERUS - CORE LOGIC
  * Features:
  * 1. Viewport Calculation (Retina support + padding correction)
  * 2. Rendering (Matte style + diffuse lighting)
