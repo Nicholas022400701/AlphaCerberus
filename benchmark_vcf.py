@@ -31,7 +31,7 @@ def vcf_numba(board, p, depth):
     return -1
 
 def main():
-    print("🔥 Benchmarking Recursion Overhead (Depth=12, Branch=5)...")
+    print("🔥 Benchmarking Recursion Overhead (Depth=9, Branch=5)...")
     
     board = np.zeros((15, 15), dtype=np.int8)
     
@@ -41,7 +41,7 @@ def main():
     # Test Python
     print("Running Python VCF (This might take a while)...")
     t0 = time.time()
-    # Python is too slow for depth 12, we use depth 9 for fair comparison projection
+    # =we use depth 9 for comparison
     vcf_py(board, 1, 9) 
     t_py = time.time() - t0
     print(f"Python (Depth 9): {t_py:.4f}s")
