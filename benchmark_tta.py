@@ -5,7 +5,7 @@ import logging
 from model import AlphaCerberusNet
 from config import CONF
 
-# 配置日志
+# Configure logging
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger("Benchmark")
 
@@ -14,47 +14,47 @@ def benchmark_inference():
     print("🔥 Alpha-Cerberus: Parallelism Economy Benchmark (AMP Mode)")
     print("=" * 60)
 
-    # 1. 硬件环境检查
+    # 1. Hardware environment check
     if not torch.cuda.is_available():
-        print("⚠️ 警告: 未检测到 GPU！无法验证并行经济学。")
+        print("⚠️ Warning: GPU not detected! Cannot verify parallelism economy.")
         return
     
     device = torch.device("cuda:0")
     props = torch.cuda.get_device_properties(device)
-    print(f"✅ 检测到 GPU: {props.name}")
+    print(f"✅ GPU detected: {props.name}")
     print(f"   VRAM: {props.total_memory / 1e9:.2f} GB")
 
-    # 2. 模型初始化 (保持 FP32 权重，让 AMP 自动管理精度)
-    print("\n[Init] 加载 AlphaCerberusNet...")
+    # 2. Model initialization (keep FP32 weights, let AMP auto-manage precision)
+    print("\n[Init] Loading AlphaCerberusNet...")
     model = AlphaCerberusNet().to(device)
     model.eval()
     
-    # 3. 准备数据 (保持 FP32 输入)
+    # 3. Prepare data (keep FP32 input)
     C, H, W = CONF.INPUT_CHANNELS, CONF.BOARD_SIZE, CONF.BOARD_SIZE
     
-    # Batch = 1 (模拟单次推理)
+    # Batch = 1 (simulate single inference)
     input_b1 = torch.randn(1, C, H, W, device=device)
 
-    # Batch = 8 (模拟 TTA 推理：原图 + 3次旋转 + 4次镜像)
+    # Batch = 8 (simulate TTA inference: original + 3 rotations + 4 flips)
     input_b8 = torch.randn(8, C, H, W, device=device)
 
-    # 4. 预热 (Warmup)
-    print("[Warmup] 正在预热 GPU (50 次迭代)...")
+    # 4. Warmup
+    print("[Warmup] Warming up GPU (50 iterations)...")
     with torch.inference_mode():
-        # 使用 AMP 上下文
+        # Use AMP context
         with torch.amp.autocast('cuda'):
             for _ in range(50):
                 _ = model(input_b8)
     torch.cuda.synchronize()
 
-    # 5. 定义测速函数
+    # 5. Define timing function
     def run_test(tensor, iterations=1000, label=""):
         torch.cuda.synchronize()
         t0 = time.time()
         
         with torch.inference_mode():
             for _ in range(iterations):
-                # 关键修复：使用 autocast 替代手动的 .half()
+                # Key fix: use autocast instead of manual .half()
                 with torch.amp.autocast('cuda'):
                     _ = model(tensor)
                 
@@ -65,28 +65,28 @@ def benchmark_inference():
         print(f"   👉 {label:<20} | {iterations} iters | Avg Latency: {avg_ms:.3f} ms")
         return avg_ms
 
-    # 6. 执行测试
-    print("\n[Testing] 开始基准测试 (N=1000)...")
+    # 6. Run tests
+    print("\n[Testing] Starting benchmark test (N=1000)...")
     latency_b1 = run_test(input_b1, 1000, "Single (B=1)")
     latency_b8 = run_test(input_b8, 1000, "TTA (B=8)")
 
-    # 7. 结果分析
+    # 7. Result analysis
     print("-" * 60)
-    print("📊 实验结果分析:")
-    print(f"   • 单次推理耗时 : {latency_b1:.3f} ms")
-    print(f"   • TTA 并行耗时 : {latency_b8:.3f} ms")
+    print("📊 Experimental Results Analysis:")
+    print(f"   • Single inference time : {latency_b1:.3f} ms")
+    print(f"   • TTA parallel time : {latency_b8:.3f} ms")
     
     delta = latency_b8 - latency_b1
     ratio = latency_b8 / latency_b1
     
-    print(f"\n   📈 边际成本 (Marginal Cost): +{delta:.3f} ms")
-    print(f"   🚀 吞吐量倍增 (Scaling): 计算量增加 8.0x -> 耗时仅增加 {ratio:.2f}x")
+    print(f"\n   📈 Marginal Cost: +{delta:.3f} ms")
+    print(f"   🚀 Throughput Scaling: computation increased 8.0x -> time only increased {ratio:.2f}x")
     
     if ratio < 2.0:
-        print("\n✅ 验证成功: 并行经济学 (Parallelism Economy) 成立。")
-        print("   结论：在 RTX 4060 上，利用 TTA 增强模型鲁棒性几乎是‘免费’的。")
+        print("\n✅ Verification successful: Parallelism Economy established.")
+        print("   Conclusion: On RTX 4060, using TTA to enhance model robustness is nearly 'free'.")
     else:
-        print("\n⚠️ 验证存疑: 并行优势不明显。")
+        print("\n⚠️ Verification questionable: Parallel advantage not significant.")
     
     print("=" * 60)
 
