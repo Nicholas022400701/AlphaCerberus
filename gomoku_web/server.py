@@ -245,5 +245,5 @@ def ai_move():
     return jsonify({"x": int(x), "y": int(y)})
 
 if __name__ == "__main__":
-    print("\nAlpha-Cerberus Server Running...\n")
+    print("\nAlpha-Cerberus Server Running On 127.0.0.1:5050 ...\n")
     app.run(host="127.0.0.1", port=5050, debug=False)
