@@ -78,10 +78,10 @@ Data is the fuel. Without high-quality data, the model is garbage.
 
 Once the model is trained, it needs to be put to use.
 
-- **`play_web.py`**
+- **`gomoku_web/server.py`**
   - **Purpose**: Web game backend (Flask).
   - **Usage**: Run and visit `localhost:5000`.
-  - **Logic**: Loads trained model (`sl_best.ckpt`), instantiates `AIPilot` class. Processes coordinates from frontend, calls MCTS to return AI moves. Logs game records.
+  - **Logic**: Loads trained model (`sl_best.ckpt`), provides web interface for playing. Supports multiple AI levels and integrates with the neural network model via MCTS.
 - **`ABArena.py`**
   - **Purpose**: Batch arena (GPU accelerated).
   - **Logic**: Uses multiprocessing + shared GPU inference to let AI play against itself or Minimax. For rapid model win rate evaluation without watching the screen.
@@ -125,11 +125,35 @@ Located in the `gomoku_web/` directory.
 
 ------
 
+## Requirements
+
+### Python Version
+- **Python 3.12.7** (Required)
+
+### Dependencies
+Install the following libraries before running the project:
+
+```bash
+pip install torch numpy numba flask tqdm tensorboard
+```
+
+**Core Libraries:**
+- `torch` - PyTorch deep learning framework for neural network training and inference
+- `numpy` - Numerical computing library for array operations
+- `numba` - JIT compiler for accelerating Python/NumPy code (VCF/VCT solver optimization)
+- `flask` - Web framework for the game interface
+- `tqdm` - Progress bar for training iterations
+- `tensorboard` - TensorBoard logging for training visualization (via PyTorch)
+
+**Note**: PyTorch installation may require CUDA-specific versions for GPU support. Visit [pytorch.org](https://pytorch.org/) for installation instructions based on your system.
+
+------
+
 **Usage Guide:**
 
-1. **Environment**: Install PyTorch, Numba, Flask. Don't run training without a GPU.
+1. **Environment**: Install Python 3.12.7 and all required dependencies listed above. Don't run training without a GPU.
 2. **Data**: Process game records with `parse.py`, merge multiple `.npz` files with `merge.py`.
 3. **Training**: Run `SLTrain.py` to get `sl_best.ckpt`.
-4. **Run**: Execute `play_web.py` to start playing.
+4. **Run**: Execute `python gomoku_web/server.py` to start playing.
 
 **File documentation complete. Read the code above for detailed logic.**
