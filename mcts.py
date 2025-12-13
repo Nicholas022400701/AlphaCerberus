@@ -126,7 +126,11 @@ class MCTS:
         if defensive_move != -1:
              if verbose: logging.info(f"   >>> 🛡️ Deep Defense (VCF Block)!")
              return self._one_hot(defensive_move), "Defensive VCF"
-
+        if CONF.ENABLE_VCT:
+            defensive_vct = self._check_defensive_vct(env)
+            if defensive_vct != -1:
+                if verbose: logging.info(f"   >>> 🛡️ Deep Defense (VCT Block)!")
+                return self._one_hot(defensive_vct), "Defensive VCT"
         # =====================================================================
         # LAYER 3: OFFENSIVE SOLVERS
         # =====================================================================
@@ -183,6 +187,15 @@ class MCTS:
         self.sim_env.copy_from(env)
         self.sim_env.current_player = -env.current_player
         return self.sim_env.solve_vcf(CONF.VCF_DEPTH)
+    
+    def _check_defensive_vct(self, env):
+        """
+        Simulates the opponent's turn and checks if the opponent has a VCT kill move.
+        If so, the blocking point must be returned immediately.
+        """
+        self.sim_env.copy_from(env)
+        self.sim_env.current_player = -env.current_player
+        return self.sim_env.solve_vct(CONF.VCT_DEPTH, CONF.VCT_WIDTH)
 
     def _one_hot(self, action):
         p = np.zeros(CONF.ACTION_SIZE, dtype=np.float32)
