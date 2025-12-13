@@ -1,6 +1,7 @@
 import os
 import sys
 import ctypes
+import threading
 
 # =============================================================================
 # Intel MKL Signal Handling Patch
@@ -75,6 +76,7 @@ app = Flask(__name__)
 
 class InferenceEngine:
     def __init__(self):
+        self.lock = threading.Lock()
         self.device = CONF.DEVICE
         self.model = AlphaCerberusNet().to(self.device)
         self.ready = False
@@ -106,6 +108,10 @@ class InferenceEngine:
                 logger.error(f"Failed to load model: {e}")
         else:
             logger.error("Model not found. Neural network features disabled.")
+
+    def force_reset(self):
+        with self.lock:
+            self._reset_state()
 
     def _reset_state(self):
         self.env = GomokuEnv(CONF.BOARD_SIZE, CONF.N_IN_ROW, CONF.INPUT_CHANNELS)
@@ -200,6 +206,11 @@ class InferenceEngine:
 
 engine = InferenceEngine()
 
+@app.route("/reset", methods=["POST"])
+def reset_route():
+    engine.force_reset()
+    return jsonify({"status": "reset_complete"})
+
 @app.route("/")
 def index(): 
     return render_template("index.html")
@@ -219,7 +230,8 @@ def ai_move():
     if level == 3:
         if not engine.ready: return jsonify({"error": "Engine not ready"})
         try:
-            move = engine.sync_and_move(board, last_move_idx, role_name)
+            with engine.lock:
+                move = engine.sync_and_move(board, last_move_idx, role_name)
             if move: return jsonify({"x": int(move[0]), "y": int(move[1])})
             else: return jsonify({"error": "Game Over"})
         except Exception as e:
