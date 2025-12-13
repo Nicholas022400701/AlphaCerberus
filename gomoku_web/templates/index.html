@@ -143,16 +143,32 @@
             border-radius: 2px;
         }
 
-        /* Modal Overlay */
+        /* Modal Overlay - Updated for Left Image Layout */
         .modal-backdrop {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(242, 240, 235, 0.85);
-            backdrop-filter: blur(10px);
+            background: rgba(242, 240, 235, 0.9); /* Slightly more opaque for better focus */
+            backdrop-filter: blur(12px);
             display: flex; align-items: center; justify-content: center;
             z-index: 999;
             opacity: 0; pointer-events: none; transition: opacity 0.4s;
         }
         .modal-backdrop.active { opacity: 1; pointer-events: all; }
+
+        /* New Wrapper for Side-by-Side Layout */
+        .setup-wrapper {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 80px; /* Generous spacing */
+        }
+
+        .hero-image {
+            height: 400px;
+            width: auto;
+            filter: drop-shadow(20px 20px 40px rgba(92, 85, 75, 0.2));
+            /* Animation removed as per request */
+        }
 
         .setup-panel {
             background: #fff;
@@ -161,6 +177,7 @@
             border: 1px solid #EAE8E0;
             text-align: center;
             max-width: 400px;
+            min-width: 320px;
         }
         .setup-panel h2 { font-weight: normal; letter-spacing: 2px; margin-bottom: 30px; }
         
@@ -170,57 +187,73 @@
             font-family: sans-serif; color: #333; outline: none;
         }
 
+        /* Responsive Modal */
+        @media (max-width: 900px) {
+            .setup-wrapper { flex-direction: column; gap: 30px; }
+            .hero-image { height: 180px; }
+            .setup-panel { padding: 30px; }
+        }
+
     </style>
 </head>
 <body>
 
     <div class="modal-backdrop active" id="setupModal">
-        <div class="setup-panel">
-            <h2>NEW GAME</h2>
-            
-            <div class="label" style="text-align:left">MODE</div>
-            <select id="modeSelect" onchange="toggleMode()">
-                <option value="H2M">Player vs AI</option>
-                <option value="M2M">AI vs AI (Spectator)</option>
-            </select>
-            
-            <div id="h2m-controls">
-                <div class="label" style="text-align:left">YOUR SIDE</div>
-                <select id="colorSelect">
-                    <option value="1">Black (First)</option>
-                    <option value="-1">White (Second)</option>
-                </select>
+        <div class="setup-wrapper">
+            <!-- Left Side Graphic -->
+            <img src="https://www.smartsowo.com/smartsowoapi/sw-api-uploaded/note/textarea-imgs/20251213093902.svg" 
+                 class="hero-image" 
+                 alt="Tactical Illustration"
+                 onerror="this.style.display='none'">
 
-                <div class="label" style="text-align:left">OPPONENT STRENGTH</div>
-                <select id="levelSelect">
-                    <option value="3">Level 3 (Alpha-Cerberus)</option>
-                    <option value="2">Level 2 (Minimax)</option>
-                    <option value="1">Level 1 (Greedy)</option>
+            <!-- Right Side Panel -->
+            <div class="setup-panel">
+                <h2>NEW GAME</h2>
+                
+                <div class="label" style="text-align:left">MODE</div>
+                <select id="modeSelect" onchange="toggleMode()">
+                    <option value="H2M">Player vs AI</option>
+                    <option value="M2M">AI vs AI (Spectator)</option>
                 </select>
-            </div>
+                
+                <div id="h2m-controls">
+                    <div class="label" style="text-align:left">YOUR SIDE</div>
+                    <select id="colorSelect">
+                        <option value="1">Black (First)</option>
+                        <option value="-1">White (Second)</option>
+                    </select>
 
-            <div id="m2m-controls" style="display:none">
-                <div style="display:flex; gap:15px">
-                    <div style="flex:1">
-                        <div class="label" style="text-align:left">BLACK AI</div>
-                        <select id="levelBlack">
-                            <option value="3">L3 (Hard)</option>
-                            <option value="2">L2 (Medium)</option>
-                            <option value="1">L1 (Easy)</option>
-                        </select>
-                    </div>
-                    <div style="flex:1">
-                        <div class="label" style="text-align:left">WHITE AI</div>
-                        <select id="levelWhite">
-                            <option value="3">L3 (Hard)</option>
-                            <option value="2">L2 (Medium)</option>
-                            <option value="1">L1 (Easy)</option>
-                        </select>
+                    <div class="label" style="text-align:left">OPPONENT STRENGTH</div>
+                    <select id="levelSelect">
+                        <option value="3">Level 3 (Alpha-Cerberus)</option>
+                        <option value="2">Level 2 (Minimax)</option>
+                        <option value="1">Level 1 (Greedy)</option>
+                    </select>
+                </div>
+
+                <div id="m2m-controls" style="display:none">
+                    <div style="display:flex; gap:15px">
+                        <div style="flex:1">
+                            <div class="label" style="text-align:left">BLACK AI</div>
+                            <select id="levelBlack">
+                                <option value="3">L3 (Hard)</option>
+                                <option value="2">L2 (Medium)</option>
+                                <option value="1">L1 (Easy)</option>
+                            </select>
+                        </div>
+                        <div style="flex:1">
+                            <div class="label" style="text-align:left">WHITE AI</div>
+                            <select id="levelWhite">
+                                <option value="3">L3 (Hard)</option>
+                                <option value="2">L2 (Medium)</option>
+                                <option value="1">L1 (Easy)</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <button onclick="startGame()" style="width:100%; margin-top:20px">START GAME</button>
+                <button onclick="startGame()" style="width:100%; margin-top:20px">START GAME</button>
+            </div>
         </div>
     </div>
 
