@@ -125,9 +125,33 @@ Located in the `gomoku_web/` directory.
 
 ------
 
+## Requirements
+
+### Python Version
+- **Python 3.12.7** (Required)
+
+### Dependencies
+Install the following libraries before running the project:
+
+```bash
+pip install torch numpy numba flask tqdm tensorboard
+```
+
+**Core Libraries:**
+- `torch` - PyTorch deep learning framework for neural network training and inference
+- `numpy` - Numerical computing library for array operations
+- `numba` - JIT compiler for accelerating Python/NumPy code (VCF/VCT solver optimization)
+- `flask` - Web framework for the game interface
+- `tqdm` - Progress bar for training iterations
+- `tensorboard` - TensorBoard logging for training visualization (via PyTorch)
+
+**Note**: PyTorch installation may require CUDA-specific versions for GPU support. Visit [pytorch.org](https://pytorch.org/) for installation instructions based on your system.
+
+------
+
 **Usage Guide:**
 
-1. **Environment**: Install PyTorch, Numba, Flask. Don't run training without a GPU.
+1. **Environment**: Install Python 3.12.7 and all required dependencies listed above. Don't run training without a GPU.
 2. **Data**: Process game records with `parse.py`, merge multiple `.npz` files with `merge.py`.
 3. **Training**: Run `SLTrain.py` to get `sl_best.ckpt`.
 4. **Run**: Execute `play_web.py` to start playing.
