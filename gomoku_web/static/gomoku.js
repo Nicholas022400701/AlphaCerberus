@@ -175,6 +175,9 @@ function initBoard() {
         state.abortCtrl.abort();
         state.abortCtrl = null;
     }
+    
+    // Force server reset to prevent race conditions
+    fetch('/reset', { method: 'POST' }).catch(console.error);
 
     // Generate new Session ID
     state.sessionId = Date.now();
